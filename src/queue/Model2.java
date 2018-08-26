@@ -1,25 +1,65 @@
+package queue;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+public class Model2 implements Serializable {
+    private List<Product> products = new ArrayList<Product>();
+    private int capacity = 0;
+    private int timeTahap1 = 2;
+    private int timeTahap3 = 10;
 
-public class Model2 {
-	public static void main(String[] args) {
-		int[] products = {6,4};
-        int capacity = 4;
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public int getTimeTahap1() {
+        return timeTahap1;
+    }
+
+    public int getTimeTahap3() {
+        return timeTahap3;
+    }
+
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
+    }
+
+    public void setProducts(List<Product> products){
+        this.products = products;
+    }
+
+    public void setTimeTahap1(int timeTahap1) {
+        this.timeTahap1 = timeTahap1;
+    }
+
+    public void setTimeTahap3(int timeTahap3) {
+        this.timeTahap3 = timeTahap3;
+    }
+
+    public void process() {
+		//int[] products = {6,4};
+        //int capacity = 4;
         int productSum = 0;
         int batch = 0;
         int dueDate = 60;
         int setupTime = 1;
-        int timeTahap3 = 10;
+
         Map<String,Integer> timeTahap2 = new HashMap<String,Integer>();
-        int timeTahap1 = 2;
-        timeTahap2.put("p1", 3);
-        timeTahap2.put("p2", 4);
+        //timeTahap2.put("p1", 3);
+        //timeTahap2.put("p2", 4);
         
-        for(int i=0;i<products.length;i++){
-        	productSum += products[i];
+        for(int i=0;i<products.size();i++){
+            Product p = products.get(i);
+        	productSum += p.count;
+            timeTahap2.put("p" + p.no, p.time);
         }
         
         batch = (int) Math.ceil((1.0 * productSum) / capacity);

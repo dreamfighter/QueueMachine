@@ -1,3 +1,5 @@
+package queue;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,16 +9,16 @@ public class Model {
 	public static void main(String[] args) {
         boolean finish = false;
         int t = 0;
-        List<Product> list = new ArrayList<>();
+        List<Product> list = new ArrayList<Product>();
         list.add(new Product("p1",50));
         list.add(new Product("p2",40));
         
         int tMesinTahap1 = 2;
-        Map<String,Integer> tMesinTahap2 = new HashMap<>();
+        Map<String,Integer> tMesinTahap2 = new HashMap<String,Integer>();
         tMesinTahap2.put("p1", 2);
         tMesinTahap2.put("p2", 3);
         
-        Map<String,Integer> tahap2 = new HashMap<>();
+        Map<String,Integer> tahap2 = new HashMap<String,Integer>();
         
         int index = 0;
         int counter = 0;
