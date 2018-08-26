@@ -1,5 +1,7 @@
 package queue;
 
+import javafx.scene.control.TextArea;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +13,11 @@ public class Model2 implements Serializable {
     private int capacity = 0;
     private int timeTahap1 = 2;
     private int timeTahap3 = 10;
+    private TextArea textLogs;
+
+    public void setTextLogs(TextArea textLogs) {
+        this.textLogs = textLogs;
+    }
 
     public int getCapacity() {
         return capacity;
@@ -71,6 +78,8 @@ public class Model2 implements Serializable {
         	tahap3.put(i, time);
         	
         	System.out.println(i + "=" + time);
+            textLogs.appendText(i + "=" + time);
+            textLogs.appendText("\n");
         }
         
         List<Product> queue = new ArrayList<Product>();
@@ -92,6 +101,9 @@ public class Model2 implements Serializable {
         	sum += p.count;
         	
         	joinBatch.put(i, index);
+
+            textLogs.appendText("Q" + i + "=" + index + "=>" + p.count);
+            textLogs.appendText("\n");
         }
         
         Map<Integer,Integer> tahap2 = new HashMap<Integer,Integer>();
@@ -100,6 +112,8 @@ public class Model2 implements Serializable {
         	Integer time = tahap3.get(joinBatch.get(i)) - timeTahap2.get(p.name) * p.count;
         	tahap2.put(i, time);
         	System.out.println(i + "=" + time);
+            textLogs.appendText(i + "=" + time);
+            textLogs.appendText("\n");
         }
         
         Map<Integer,Integer> tahap1 = new HashMap<Integer,Integer>();
@@ -117,6 +131,8 @@ public class Model2 implements Serializable {
         	
         	tahap1.put(i, time);
         	System.out.println(i + "=" + time);
+            textLogs.appendText(i + "=" + time);
+            textLogs.appendText("\n");
         }
         
         Map<Integer,Integer> aft = new HashMap<Integer,Integer>();
@@ -127,9 +143,12 @@ public class Model2 implements Serializable {
         	total +=time;
         	aft.put(i, time);
         	System.out.println(i + "=" + time);
+            textLogs.appendText("AFT[" + i + "]=" + time);
+            textLogs.appendText("\n");
         }
         
         System.out.println("Total=" + total);
-        
+
+        textLogs.appendText("Total=" + total);
     }
 }

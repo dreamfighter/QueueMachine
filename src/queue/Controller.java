@@ -6,10 +6,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -36,6 +33,9 @@ public class Controller {
 
     @FXML
     private Button btnStart;
+
+    @FXML
+    private TextArea textLogs;
 
 
     @FXML
@@ -134,7 +134,7 @@ public class Controller {
             @Override
             public void handle(ActionEvent event) {
                 Model2 mdl2 = new Model2();
-
+                mdl2.setTextLogs(textLogs);
                 try {
                     mdl2.setCapacity(Integer.parseInt(tfCapacity.getText()));
                     mdl2.setTimeTahap1(Integer.parseInt(tfT1.getText()));
