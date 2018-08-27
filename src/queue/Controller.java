@@ -6,6 +6,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
@@ -36,6 +37,9 @@ public class Controller {
 
     @FXML
     private TextArea textLogs;
+
+    @FXML
+    private Canvas canvas;
 
 
     @FXML
@@ -135,6 +139,7 @@ public class Controller {
             public void handle(ActionEvent event) {
                 Model2 mdl2 = new Model2();
                 mdl2.setTextLogs(textLogs);
+                mdl2.setCanvas(canvas);
                 try {
                     mdl2.setCapacity(Integer.parseInt(tfCapacity.getText()));
                     mdl2.setTimeTahap1(Integer.parseInt(tfT1.getText()));

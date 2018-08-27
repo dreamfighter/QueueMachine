@@ -1,12 +1,13 @@
 package queue;
 
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.TextArea;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.ArcType;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Model2 implements Serializable {
     private List<Product> products = new ArrayList<Product>();
@@ -14,6 +15,7 @@ public class Model2 implements Serializable {
     private int timeTahap1 = 2;
     private int timeTahap3 = 10;
     private TextArea textLogs;
+    private Canvas canvas;
 
     public void setTextLogs(TextArea textLogs) {
         this.textLogs = textLogs;
@@ -51,25 +53,44 @@ public class Model2 implements Serializable {
         this.timeTahap3 = timeTahap3;
     }
 
-    public void process() {
+    public void setCanvas(Canvas canvas) {
+        this.canvas = canvas;
+    }
+
+    public void process(){
+        List<Product> queue = new ArrayList<Product>();
+        Map<String,Integer> timeTahap2 = new HashMap<String,Integer>();
+        Map<String,List<List<Product>>> result = new HashMap<String, List<List<Product>>>();
+        GeneratorUtil generator = new GeneratorUtil();
+        Random rand = new Random();
+        int productSum = 0;
+
+        for(int i=0;i<products.size();i++){
+            Product p = products.get(i);
+            productSum += p.count;
+            timeTahap2.put("p" + p.no, p.time);
+            result.put("p" + p.no,generator.generate("p" + p.no, p.count, capacity));
+        }
+
+        for(List<List<Product>> list :result.values()){
+            int  n = rand.nextInt(list.size());
+            queue.addAll(list.get(n));
+        }
+
+        processing(queue, timeTahap2, productSum);
+
+    }
+
+    public void processing(List<Product> queue,Map<String,Integer> timeTahap2, int productSum) {
 		//int[] products = {6,4};
         //int capacity = 4;
-        int productSum = 0;
+
         int batch = 0;
         int dueDate = 60;
         int setupTime = 1;
-
-        Map<String,Integer> timeTahap2 = new HashMap<String,Integer>();
-        //timeTahap2.put("p1", 3);
-        //timeTahap2.put("p2", 4);
-        
-        for(int i=0;i<products.size();i++){
-            Product p = products.get(i);
-        	productSum += p.count;
-            timeTahap2.put("p" + p.no, p.time);
-        }
         
         batch = (int) Math.ceil((1.0 * productSum) / capacity);
+
         
         Map<Integer,Integer> tahap3 = new HashMap<Integer,Integer>();
         
@@ -82,11 +103,13 @@ public class Model2 implements Serializable {
             textLogs.appendText("\n");
         }
         
-        List<Product> queue = new ArrayList<Product>();
+
+        /*
         queue.add(new Product("p2",1));
         queue.add(new Product("p1",3));
         queue.add(new Product("p2",3));
         queue.add(new Product("p1",3));
+        */
 
         
         Map<Integer,Integer> joinBatch = new HashMap<Integer,Integer>();
@@ -102,12 +125,12 @@ public class Model2 implements Serializable {
         	
         	joinBatch.put(i, index);
 
-            textLogs.appendText("Q" + i + "=" + index + "=>" + p.count);
+            textLogs.appendText("Q" + i + "=" + index + "=>[" + p.name + "," + p.count + "]");
             textLogs.appendText("\n");
         }
         
         Map<Integer,Integer> tahap2 = new HashMap<Integer,Integer>();
-        for(int i=0;i< queue.size();i++){
+        for(int i=0;i<queue.size();i++){
         	Product p = queue.get(i);
         	Integer time = tahap3.get(joinBatch.get(i)) - timeTahap2.get(p.name) * p.count;
         	tahap2.put(i, time);
@@ -117,7 +140,7 @@ public class Model2 implements Serializable {
         }
         
         Map<Integer,Integer> tahap1 = new HashMap<Integer,Integer>();
-        for(int i=0;i< queue.size();i++){
+        for(int i=0;i<queue.size();i++){
         	Product p = queue.get(i);
         	Integer time = 0;
         	if(i==0){
@@ -134,21 +157,91 @@ public class Model2 implements Serializable {
             textLogs.appendText(i + "=" + time);
             textLogs.appendText("\n");
         }
-        
+
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
         Map<Integer,Integer> aft = new HashMap<Integer,Integer>();
         int total = 0;
         for(int i=0;i< queue.size();i++){
         	Product p = queue.get(i);
         	int time = p.count * (dueDate - tahap1.get(i));
-        	total +=time;
+        	total += time;
         	aft.put(i, time);
         	System.out.println(i + "=" + time);
             textLogs.appendText("AFT[" + i + "]=" + time);
             textLogs.appendText("\n");
         }
-        
+        drawShapes(gc, queue, tahap1, tahap2, tahap3, timeTahap2,joinBatch);
         System.out.println("Total=" + total);
 
         textLogs.appendText("Total=" + total);
+    }
+
+    private void drawShapes(GraphicsContext gc, List<Product> queue, Map<Integer,Integer> tahap1, Map<Integer,Integer> tahap2,
+                            Map<Integer,Integer> tahap3, Map<String,Integer> timeTahap2,Map<Integer,Integer> joinBatch) {
+        Map<Integer,Color> colors = new HashMap<Integer, Color>();
+        Random rand = new Random();
+        for(Integer t1:tahap1.keySet()) {
+            double red = 1.0 * rand.nextInt(10)/10;
+            double green = 1.0 * rand.nextInt(10)/10;
+            double blue = 1.0 * rand.nextInt(10)/10;
+
+            colors.put(t1,new Color(red, green, blue,1.0f));
+        }
+        //gc.setStroke(Color.BLUE);
+
+        int min = Integer.MAX_VALUE;
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
+        for(Integer t1:tahap1.keySet()) {
+            if(min > tahap1.get(t1)){
+                min = tahap1.get(t1);
+            }
+        }
+
+        int height = 20;
+        int width = 20;
+
+        for(Integer t1:tahap1.keySet()) {
+            Product p = queue.get(t1);
+            int top = ((t1 + 1) * height) + 50;
+            int left = 10 + ((tahap1.get(t1) - min) * width);
+            gc.setFill(colors.get(t1));
+            gc.fillRoundRect(left, top, p.count * timeTahap1 * width, height, 5, 5);
+            gc.setFill(Color.BLACK);
+            gc.fillText("T1" ,left, top + 15);
+        }
+
+        for(Integer t2:tahap2.keySet()) {
+            Product p = queue.get(t2);
+            int top = ((t2 + 1) * height) + 50;
+            int left = 10 + ((tahap2.get(t2) - min) * width);
+            gc.setFill(colors.get(t2));
+            gc.fillRoundRect(left, top, timeTahap2.get(p.name) * p.count * width, height, 5, 5);
+            gc.setFill(Color.BLACK);
+            gc.fillText("T2" ,left, top + 15);
+        }
+
+        for(Integer t3:tahap2.keySet()) {
+            Product p = queue.get(t3);
+            int b = joinBatch.get(t3);
+            int top = ((t3 + 1) * height) + 50;
+            int left = 10 + ((tahap3.get(b) - min) * width);
+            gc.setFill(colors.get(t3));
+            gc.fillRoundRect(left, top, timeTahap3 * width, height, 5, 5);
+            gc.setFill(Color.BLACK);
+            gc.fillText("T3" ,left, top + 15);
+        }
+
+        gc.setFill(Color.BLACK);
+        gc.setLineWidth(2);
+        gc.strokeLine(0, canvas.getHeight()-15, canvas.getWidth(), canvas.getHeight()-15);
+
+        for(int i=0;i<60;i++){
+            int left = 10 + (width * i);
+            gc.strokeLine(left, canvas.getHeight()-15, left, canvas.getHeight()-10);
+            gc.fillText("" + (i + min),left-5,canvas.getHeight());
+        }
+
     }
 }
