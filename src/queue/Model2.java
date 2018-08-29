@@ -4,7 +4,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.TextArea;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.ArcType;
+import swarm.SwarmAlgorithms;
 
 import java.io.Serializable;
 import java.util.*;
@@ -16,6 +16,7 @@ public class Model2 implements Serializable {
     private int timeTahap3 = 10;
     private TextArea textLogs;
     private Canvas canvas;
+    private int productSum = 0;
 
     public void setTextLogs(TextArea textLogs) {
         this.textLogs = textLogs;
@@ -59,11 +60,11 @@ public class Model2 implements Serializable {
 
     public void process(){
         List<Product> queue = new ArrayList<Product>();
-        Map<String,Integer> timeTahap2 = new HashMap<String,Integer>();
+        final Map<String,Integer> timeTahap2 = new HashMap<String,Integer>();
         Map<String,List<List<Product>>> result = new HashMap<String, List<List<Product>>>();
         GeneratorUtil generator = new GeneratorUtil();
         Random rand = new Random();
-        int productSum = 0;
+        productSum = 0;
 
         for(int i=0;i<products.size();i++){
             Product p = products.get(i);
@@ -77,11 +78,29 @@ public class Model2 implements Serializable {
             queue.addAll(list.get(n));
         }
 
-        processing(queue, timeTahap2, productSum);
+        //processing(queue, timeTahap2, productSum);
+
+        SwarmAlgorithms swarmAlgorithms = new SwarmAlgorithms();
+        swarmAlgorithms.setEvaluation(new SwarmAlgorithms.Evaluation() {
+            @Override
+            public int calculateFitness(List<Product> products) {
+                return processing(products, timeTahap2, productSum, false);
+            }
+
+            @Override
+            public void minimum(int min, List<Product> products) {
+
+                processing(products, timeTahap2, productSum, true);
+
+                textLogs.appendText("Minimum AFT=" + min);
+                textLogs.appendText("\n");
+            }
+        });
+        swarmAlgorithms.initialization(result);
 
     }
 
-    public void processing(List<Product> queue,Map<String,Integer> timeTahap2, int productSum) {
+    public int processing(List<Product> queue,Map<String,Integer> timeTahap2, int productSum, boolean draw) {
 		//int[] products = {6,4};
         //int capacity = 4;
 
@@ -171,10 +190,16 @@ public class Model2 implements Serializable {
             textLogs.appendText("AFT[" + i + "]=" + time);
             textLogs.appendText("\n");
         }
-        drawShapes(gc, queue, tahap1, tahap2, tahap3, timeTahap2,joinBatch);
+
+        if(draw) {
+            drawShapes(gc, queue, tahap1, tahap2, tahap3, timeTahap2,joinBatch);
+        }
         System.out.println("Total=" + total);
 
         textLogs.appendText("Total=" + total);
+        textLogs.appendText("\n");
+
+        return total;
     }
 
     private void drawShapes(GraphicsContext gc, List<Product> queue, Map<Integer,Integer> tahap1, Map<Integer,Integer> tahap2,
