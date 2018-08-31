@@ -4,6 +4,8 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.TextArea;
 import javafx.scene.paint.Color;
+import swarm.FitnessFunction;
+import swarm.Multiswarm;
 import swarm.SwarmAlgorithms;
 
 import java.io.Serializable;
@@ -96,7 +98,21 @@ public class Model2 implements Serializable {
                 textLogs.appendText("\n");
             }
         });
+
         swarmAlgorithms.initialization(result);
+        Multiswarm multiswarm = new Multiswarm(3, 5, new FitnessFunction() {
+            @Override
+            public double getFitness(long[] particlePosition) {
+                Long sum = 0l;
+                for(int i=0;i<particlePosition.length;i++){
+                    sum += particlePosition[i];
+
+                }
+                return sum / particlePosition.length;
+            }
+        });
+
+        multiswarm.mainLoop();
 
     }
 
