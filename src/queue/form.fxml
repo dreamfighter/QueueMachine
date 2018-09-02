@@ -2,6 +2,9 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
@@ -88,6 +91,40 @@
       </TableView>
       <TextArea fx:id="textLogs" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
       <Canvas fx:id="canvas" height="249.0" width="1095.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="7" />
+      <LineChart fx:id="tempChart1" GridPane.columnIndex="2" GridPane.rowIndex="6">
+        <xAxis>
+          <CategoryAxis side="BOTTOM" />
+        </xAxis>
+        <yAxis>
+          <NumberAxis side="LEFT" />
+        </yAxis>
+      </LineChart>
+      <FlowPane alignment="CENTER_RIGHT" prefHeight="35.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="1">
+         <children>
+            <Label text="Due Date :">
+               <font>
+                  <Font name="System Bold" size="13.0" />
+               </font>
+            </Label>
+            <TextField fx:id="dueDateField" prefHeight="27.0" prefWidth="98.0" />
+         </children>
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </FlowPane>
+      <FlowPane alignment="CENTER_RIGHT" prefHeight="35.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
+         <children>
+            <Label text="Trheshold :">
+               <font>
+                  <Font name="System Bold" size="13.0" />
+               </font>
+            </Label>
+            <TextField fx:id="thresholdField" prefHeight="27.0" prefWidth="98.0" />
+         </children>
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </FlowPane>
    </children>
    <padding>
       <Insets left="20.0" top="20.0" />

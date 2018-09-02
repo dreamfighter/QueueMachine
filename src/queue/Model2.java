@@ -1,7 +1,10 @@
 package queue;
 
+import ga.GeneticAlgorithms;
+import javafx.application.Platform;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.TextArea;
 import javafx.scene.paint.Color;
 import swarm.FitnessFunction;
@@ -16,8 +19,13 @@ public class Model2 implements Serializable {
     private int capacity = 0;
     private int timeTahap1 = 2;
     private int timeTahap3 = 10;
+    private int threshold;
+    private int dueDate = 60;
     private TextArea textLogs;
     private Canvas canvas;
+
+    private XYChart.Series[] channels;
+
     private int productSum = 0;
 
     public void setTextLogs(TextArea textLogs) {
@@ -60,12 +68,24 @@ public class Model2 implements Serializable {
         this.canvas = canvas;
     }
 
+    public void setChannels(XYChart.Series[] channels) {
+        this.channels = channels;
+    }
+
+    public void setDueDate(int dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public void setThreshold(int threshold) {
+        this.threshold = threshold;
+    }
+
     public void process(){
         List<Product> queue = new ArrayList<Product>();
         final Map<String,Integer> timeTahap2 = new HashMap<String,Integer>();
         Map<String,List<List<Product>>> result = new HashMap<String, List<List<Product>>>();
         GeneratorUtil generator = new GeneratorUtil();
-        Random rand = new Random();
+        //Random rand = new Random();
         productSum = 0;
 
         for(int i=0;i<products.size();i++){
@@ -75,13 +95,55 @@ public class Model2 implements Serializable {
             result.put("p" + p.no,generator.generate("p" + p.no, p.count, capacity));
         }
 
+        /*
+        queue.add(new Product("p2",1));
+        queue.add(new Product("p1",4));
+        queue.add(new Product("p2",2));
+        queue.add(new Product("p2",1));
+        queue.add(new Product("p1",2));
+
+        processing(queue,timeTahap2, productSum, true);
+        */
+
+
+        GeneticAlgorithms ga = new GeneticAlgorithms();
+        ga.setFitnessFunction(new ga.FitnessFunction() {
+            @Override
+            public int calculateFitness(List<Product> products) {
+                return processing(products, timeTahap2, productSum, false);
+            }
+
+            @Override
+            public void minimum(int min, List<Product> products) {
+                processing(products, timeTahap2, productSum, true);
+
+                textLogs.appendText("Minimum AFT=" + min);
+            }
+
+            @Override
+            public void bestFitness(final int seq, final int min) {
+                Platform.runLater(new Runnable() {
+
+                    public void run() {
+                        channels[0].getData().add(new XYChart.Data("" + seq, min));
+                    }
+                });
+            }
+        });
+
+        ga.init(result, threshold);
+
+
+        /*
         for(List<List<Product>> list :result.values()){
             int  n = rand.nextInt(list.size());
             queue.addAll(list.get(n));
         }
+        */
 
         //processing(queue, timeTahap2, productSum);
 
+        /*
         SwarmAlgorithms swarmAlgorithms = new SwarmAlgorithms();
         swarmAlgorithms.setEvaluation(new SwarmAlgorithms.Evaluation() {
             @Override
@@ -113,30 +175,18 @@ public class Model2 implements Serializable {
         });
 
         multiswarm.mainLoop();
-
+        */
     }
 
     public int processing(List<Product> queue,Map<String,Integer> timeTahap2, int productSum, boolean draw) {
 		//int[] products = {6,4};
         //int capacity = 4;
 
-        int batch = 0;
-        int dueDate = 60;
+        //int batch = 0;
+        //int dueDate = 60;
         int setupTime = 1;
         
-        batch = (int) Math.ceil((1.0 * productSum) / capacity);
-
-        
-        Map<Integer,Integer> tahap3 = new HashMap<Integer,Integer>();
-        
-        for(int i=0;i<batch;i++){
-        	int time = dueDate - (((i+1) * timeTahap3) + (setupTime * i));
-        	tahap3.put(i, time);
-        	
-        	System.out.println(i + "=" + time);
-            textLogs.appendText(i + "=" + time);
-            textLogs.appendText("\n");
-        }
+        //batch = (int) Math.ceil((1.0 * productSum) / capacity);
         
 
         /*
@@ -159,17 +209,31 @@ public class Model2 implements Serializable {
         	sum += p.count;
         	
         	joinBatch.put(i, index);
-
+            System.out.println("Q" + i + "=" + index + "=>[" + p.name + "," + p.count + "]");
             textLogs.appendText("Q" + i + "=" + index + "=>[" + p.name + "," + p.count + "]");
+            textLogs.appendText("\n");
+        }
+
+        Map<Integer,Integer> tahap3 = new HashMap<Integer,Integer>();
+
+        for(int i=0;i<index + 1;i++){
+            int time = dueDate - (((i+1) * timeTahap3) + (setupTime * i));
+            tahap3.put(i, time);
+
+            //System.out.println("T3" + i + "=" + time);
+            textLogs.appendText("T3" + i + "=" + time);
             textLogs.appendText("\n");
         }
         
         Map<Integer,Integer> tahap2 = new HashMap<Integer,Integer>();
         for(int i=0;i<queue.size();i++){
         	Product p = queue.get(i);
+
+            //System.out.println("tahap3-" + i + "=" + joinBatch.get(i) + ":"+ tahap3.get(joinBatch.get(i)));
+
         	Integer time = tahap3.get(joinBatch.get(i)) - timeTahap2.get(p.name) * p.count;
         	tahap2.put(i, time);
-        	System.out.println(i + "=" + time);
+        	//System.out.println(i + "=" + time);
             textLogs.appendText(i + "=" + time);
             textLogs.appendText("\n");
         }
@@ -183,12 +247,12 @@ public class Model2 implements Serializable {
         	}else{
         		int time1 = tahap1.get(i-1) - (timeTahap1 * p.count) - 1;
         		int time2 = tahap2.get(i) - (timeTahap1 * p.count);
-        		System.out.println("min("+time1+","+time2+")");
+        		//System.out.println("min("+time1+","+time2+")");
         		time = Math.min(time1, time2);
         	}
         	
         	tahap1.put(i, time);
-        	System.out.println(i + "=" + time);
+        	//System.out.println(i + "=" + time);
             textLogs.appendText(i + "=" + time);
             textLogs.appendText("\n");
         }

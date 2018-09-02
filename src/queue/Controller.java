@@ -7,6 +7,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
@@ -14,6 +16,7 @@ import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 
 import java.io.*;
+import java.util.Date;
 
 public class Controller {
 
@@ -41,6 +44,16 @@ public class Controller {
     @FXML
     private Canvas canvas;
 
+    @FXML
+    private TextField dueDateField;
+
+    @FXML
+    private TextField thresholdField;
+
+    @FXML
+    private LineChart<Number,Number> tempChart1;
+
+    private XYChart.Series[] channels= new XYChart.Series[1];
 
     @FXML
     public void initialize() {
@@ -53,6 +66,8 @@ public class Controller {
                 tfT1.setText(String.valueOf(model.getTimeTahap1()));
                 tfT3.setText(String.valueOf(model.getTimeTahap3()));
                 tfJumlahProduct.setText(String.valueOf(model.getProducts().size()));
+                thresholdField.setText(String.valueOf(model.getThreshold()));
+                dueDateField.setText(String.valueOf(model.getDueDate()));
                 ois.close();
 
                 tableProducts.getItems().clear();
@@ -144,8 +159,13 @@ public class Controller {
                     mdl2.setCapacity(Integer.parseInt(tfCapacity.getText()));
                     mdl2.setTimeTahap1(Integer.parseInt(tfT1.getText()));
                     mdl2.setTimeTahap1(Integer.parseInt(tfT1.getText()));
+                    mdl2.setChannels(channels);
+                    mdl2.setThreshold(Integer.parseInt(thresholdField.getText()));
+                    mdl2.setDueDate(Integer.parseInt(dueDateField.getText()));
 
                     SerializableModel model = new SerializableModel();
+                    model.setThreshold(Integer.parseInt(thresholdField.getText()));
+                    model.setDueDate(Integer.parseInt(dueDateField.getText()));
                     model.setCapacity(Integer.parseInt(tfCapacity.getText()));
                     model.setTimeTahap1(Integer.parseInt(tfT1.getText()));
                     model.setTimeTahap3(Integer.parseInt(tfT3.getText()));
@@ -173,5 +193,21 @@ public class Controller {
 
             }
         });
+
+        setupChart();
+    }
+
+    public void setupChart(){
+        for(int i=0;i<channels.length;i++){
+            channels[i] = new XYChart.Series();
+            channels[i].setName("Channel "+(i+1));
+            tempChart1.getData().add(channels[i]);
+        }
+
+        tempChart1.setTitle("Optimation Chart");
+
+
+        //timer.schedule(task,5000l);
+
     }
 }

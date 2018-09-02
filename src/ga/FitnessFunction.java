@@ -14,4 +14,5 @@ public interface FitnessFunction {
      */
     int calculateFitness(List<Product> products);
     void minimum(int min, List<Product> products);
+    void bestFitness(int seq, int min);
 }

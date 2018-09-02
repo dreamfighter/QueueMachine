@@ -14,7 +14,7 @@ import java.util.*;
 public class Population {
     private List<List<Product>> individuals = new ArrayList<List<Product>>();
     private Random rand = new Random();
-
+    private int minFitness = Integer.MAX_VALUE;
     private FitnessFunction fitnessFunction;
 
     public void initialization(Map<String,List<List<Product>>> source, int populationSize){
@@ -33,11 +33,31 @@ public class Population {
         for(int i=0;i<populationSize;i++){
             individuals.add(generateIndividu(source));
         }
+
+        for(List<Product> l:individuals){
+            for (Product p:l){
+                System.out.println("new["+p.getName()+"]=>" + p.getCount());
+            }
+            System.out.println();
+        }
     }
 
-    public List<Product> mutate(List<Product> candidate){
-        Collections.shuffle(candidate);;
-        return candidate;
+    public List<Product> getBestCandidate() {
+        List<Product> bestCandidate = new ArrayList<Product>();
+        // Loop through individuals to find fittest
+        minFitness = Integer.MAX_VALUE;
+        for (int i = 0; i < individuals.size(); i++) {
+            int fitness = fitnessFunction.calculateFitness(individuals.get(i));
+            if (fitness < minFitness) {
+                minFitness = fitness;
+                bestCandidate = individuals.get(i);
+            }
+        }
+        return bestCandidate;
+    }
+
+    public int getMinFitness() {
+        return minFitness;
     }
 
     public List<Product> generateIndividu(Map<String,List<List<Product>>> source){
@@ -51,66 +71,6 @@ public class Population {
         Collections.shuffle(candidate);
 
         return candidate;
-    }
-
-    public List<Product> crossover(List<Product> indv1,List<Product> indv2){
-        //List<List<Product>> newIndv = new ArrayList<List<Product>>();
-        Map<String, List<Product>> map = new HashMap<String, List<Product>>();
-        for(Product p:indv1){
-            List<Product> nP = map.get(p.getName());
-            if(nP==null){
-                nP = new ArrayList<Product>();
-                map.put(p.getName(),nP);
-            }
-            nP.add(p);
-        }
-
-        //newIndv.add(new ArrayList<Product>(map.get("p1")));
-        //newIndv.add(new ArrayList<Product>(map.get("p2")));
-
-        int index = 0;
-        Iterator<Product> iterator = indv2.iterator();
-        while(iterator.hasNext()){
-            Product p = iterator.next();
-            if(p.getName().equals("p2")){
-                List<Product> pl = map.get("p2");
-                if(index<pl.size()) {
-                    p.setNo(pl.get(index).getNo());
-
-                }else{
-                    iterator.remove();
-                }
-                index++;
-            }
-        }
-
-        //newIndv.get(0).addAll(map.get("p2"));
-        //newIndv.get(1).addAll(map.get("p1"));
-
-        return indv2;
-    }
-
-    // Select individuals for crossover
-    private List<Product> tournamentSelection(List<List<Product>> pop) {
-        int tournamentSize = 5;
-        // Create a tournament population
-        List<List<Product>> tournament = new ArrayList<List<Product>>();
-        // For each place in the tournament get a random individual
-        for (int i = 0; i < tournamentSize; i++) {
-            int randomId = (int) (Math.random() * pop.size());
-            tournament.add(i, pop.get(randomId));
-        }
-        // Get the fittest
-        List<Product> indv = tournament.get(0);
-        int min = Integer.MAX_VALUE;
-        for(List<Product> pl:tournament){
-            int fitness = fitnessFunction.calculateFitness(pl);
-            if(fitness<min){
-                min = fitness;
-                indv = pl;
-            }
-        }
-        return indv;
     }
 
     private List<Product> generateSecondIndividu(List<List<Product>> secondCandidate){
@@ -136,15 +96,15 @@ public class Population {
         return particle;
     }
 
-    public void setFitnessFunction(FitnessFunction fitnessFunction) {
-        this.fitnessFunction = fitnessFunction;
-    }
-
     public void setIndividuals(List<List<Product>> individuals) {
         this.individuals = individuals;
     }
 
     public List<List<Product>> getIndividuals() {
         return individuals;
+    }
+
+    public void setFitnessFunction(FitnessFunction fitnessFunction) {
+        this.fitnessFunction = fitnessFunction;
     }
 }

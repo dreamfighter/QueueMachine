@@ -11,6 +11,9 @@ public class SerializableModel implements Serializable {
     private int capacity = 0;
     private int timeTahap1 = 2;
     private int timeTahap3 = 10;
+    private int threshold = 300;
+    private int dueDate = 60;
+
 
     public List<SerializableProduct> getProducts() {
         return products;
@@ -42,5 +45,21 @@ public class SerializableModel implements Serializable {
 
     public void setTimeTahap3(int timeTahap3) {
         this.timeTahap3 = timeTahap3;
+    }
+
+    public int getThreshold() {
+        return threshold;
+    }
+
+    public void setThreshold(int threshold) {
+        this.threshold = threshold;
+    }
+
+    public int getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(int dueDate) {
+        this.dueDate = dueDate;
     }
 }
